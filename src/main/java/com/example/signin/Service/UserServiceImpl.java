@@ -36,10 +36,12 @@ public class UserServiceImpl implements UserService {
         }
         UserEntity userEntity = userDTO.dtoToEntity();
         userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        userEntity.setProvider("local"); // 직접 회원가입은 'local'로 설정
         UserEntity savedUser = userRepository.save(userEntity);
         logger.info("회원가입 완료! " + userEntity);
         return UserDTO.entityToDto(savedUser);
     }
+
 
     //회원 조회
     @Override
@@ -90,9 +92,6 @@ public class UserServiceImpl implements UserService {
         }
         if (userDTO.getNickname() != null) {
             userEntity.setNickname(userDTO.getNickname());
-        }
-        if (userDTO.getImage() != null) {
-            userEntity.setImage(userDTO.getImage());
         }
 
         UserEntity updatedUser = userRepository.save(userEntity);

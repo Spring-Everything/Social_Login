@@ -69,7 +69,8 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/", "/login**", "/oauth2/**", "/login", "/loginFailure", "/error", "/user/login").permitAll()  // 일반 로그인 허용
                                 .requestMatchers("/user/kakao/**").authenticated()  // 카카오 유저 정보 조회 경로 보호
-                                .anyRequest().authenticated()  // 그 외 모든 요청에 대해 인증 요구
+//                                .anyRequest().authenticated()  // 그 외 모든 요청에 대해 인증 요구
+                                .anyRequest().permitAll() // 모든 요청 허용
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -89,6 +90,8 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){

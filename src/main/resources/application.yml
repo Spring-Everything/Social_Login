@@ -4,7 +4,7 @@ jwt:
 
 spring:
   application:
-    name: MangoWafflee
+    name: signin
 
   datasource:
     url: ${DB_URL}
