@@ -321,18 +321,25 @@ public class UserServiceImpl implements UserService {
         params.add("redirect_uri", naverOAuthProperties.getRedirectUri());
         params.add("code", code);
 
+        logger.info("액세스 토큰 요청 URL: {}", url);
+        logger.info("액세스 토큰 요청 헤더: {}", headers);
+        logger.info("액세스 토큰 요청 파라미터: {}", params);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
-                return (String) responseBody.get("access_token");
+                String accessToken = (String) responseBody.get("access_token");
+                logger.info("액세스 토큰을 성공적으로 가져왔습니다: {}", accessToken);
+                return accessToken;
             } else {
                 logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
                 return null;
             }
         } catch (HttpClientErrorException e) {
             logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getNaverAccessToken): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getNaverAccessToken): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -343,10 +350,15 @@ public class UserServiceImpl implements UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        logger.info("사용자 정보 요청 URL: {}", url);
+        logger.info("사용자 정보 요청 헤더: {}", headers);
+
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
+                logger.info("사용자 정보를 성공적으로 가져왔습니다 : {}", responseBody);
                 return responseBody;
             } else {
                 logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
@@ -354,6 +366,7 @@ public class UserServiceImpl implements UserService {
             }
         } catch (HttpClientErrorException e) {
             logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getNaverUserInfo): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getNaverUserInfo): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -415,18 +428,25 @@ public class UserServiceImpl implements UserService {
         params.add("redirect_uri", googleOAuthProperties.getRedirectUri());
         params.add("code", code);
 
+        logger.info("액세스 토큰 요청 URL: {}", url);
+        logger.info("액세스 토큰 요청 헤더: {}", headers);
+        logger.info("액세스 토큰 요청 파라미터: {}", params);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
-                return (String) responseBody.get("access_token");
+                String accessToken = (String) responseBody.get("access_token");
+                logger.info("액세스 토큰을 성공적으로 가져왔습니다: {}", accessToken);
+                return accessToken;
             } else {
                 logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
                 return null;
             }
         } catch (HttpClientErrorException e) {
             logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getGoogleAccessToken): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getGoogleAccessToken): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -437,10 +457,15 @@ public class UserServiceImpl implements UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        logger.info("사용자 정보 요청 URL: {}", url);
+        logger.info("사용자 정보 요청 헤더: {}", headers);
+
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
+                logger.info("사용자 정보를 성공적으로 가져왔습니다 : {}", responseBody);
                 return responseBody;
             } else {
                 logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
@@ -448,6 +473,7 @@ public class UserServiceImpl implements UserService {
             }
         } catch (HttpClientErrorException e) {
             logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getGoogleUserInfo): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getGoogleUserInfo): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -509,18 +535,25 @@ public class UserServiceImpl implements UserService {
         params.add("redirect_uri", facebookOAuthProperties.getRedirectUri());
         params.add("code", code);
 
+        logger.info("액세스 토큰 요청 URL: {}", url);
+        logger.info("액세스 토큰 요청 헤더: {}", headers);
+        logger.info("액세스 토큰 요청 파라미터: {}", params);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
-                return (String) responseBody.get("access_token");
+                String accessToken = (String) responseBody.get("access_token");
+                logger.info("액세스 토큰을 성공적으로 가져왔습니다: {}", accessToken);
+                return accessToken;
             } else {
                 logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
                 return null;
             }
         } catch (HttpClientErrorException e) {
             logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getFacebookAccessToken): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getFacebookAccessToken): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -531,10 +564,15 @@ public class UserServiceImpl implements UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        logger.info("사용자 정보 요청 URL: {}", url);
+        logger.info("사용자 정보 요청 헤더: {}", headers);
+
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
+                logger.info("사용자 정보를 성공적으로 가져왔습니다 : {}", responseBody);
                 return responseBody;
             } else {
                 logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
@@ -542,6 +580,7 @@ public class UserServiceImpl implements UserService {
             }
         } catch (HttpClientErrorException e) {
             logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getFacebookUserInfo): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getFacebookUserInfo): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -604,18 +643,25 @@ public class UserServiceImpl implements UserService {
         params.add("redirect_uri", githubOAuthProperties.getRedirectUri());
         params.add("code", code);
 
+        logger.info("액세스 토큰 요청 URL: {}", url);
+        logger.info("액세스 토큰 요청 헤더: {}", headers);
+        logger.info("액세스 토큰 요청 파라미터: {}", params);
+
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
-                return (String) responseBody.get("access_token");
+                String accessToken = (String) responseBody.get("access_token");
+                logger.info("액세스 토큰을 성공적으로 가져왔습니다: {}", accessToken);
+                return accessToken;
             } else {
                 logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
                 return null;
             }
         } catch (HttpClientErrorException e) {
             logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getGithubAccessToken): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getGithubAccessToken): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -626,10 +672,15 @@ public class UserServiceImpl implements UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        logger.info("사용자 정보 요청 URL: {}", url);
+        logger.info("사용자 정보 요청 헤더: {}", headers);
+
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null) {
+                logger.info("사용자 정보를 성공적으로 가져왔습니다 : {}", responseBody);
                 return responseBody;
             } else {
                 logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
@@ -637,6 +688,7 @@ public class UserServiceImpl implements UserService {
             }
         } catch (HttpClientErrorException e) {
             logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getGithubUserInfo): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getGithubUserInfo): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
@@ -647,6 +699,10 @@ public class UserServiceImpl implements UserService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        logger.info("사용자 이메일 요청 URL: {}", url);
+        logger.info("사용자 이메일 요청 헤더: {}", headers);
+
         try {
             ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
             List<Map<String, Object>> emails = response.getBody();
@@ -656,6 +712,7 @@ public class UserServiceImpl implements UserService {
                     Boolean verified = (Boolean) emailData.get("verified");
                     String email = (String) emailData.get("email");
                     if (primary != null && primary && verified != null && verified) {
+                        logger.info("사용자 이메일을 성공적으로 가져왔습니다: {}", email);
                         return email;
                     }
                 }
@@ -664,6 +721,7 @@ public class UserServiceImpl implements UserService {
             return null;
         } catch (HttpClientErrorException e) {
             logger.error("사용자 이메일을 가져오는 중 오류가 발생했습니다. (위치: getGithubUserEmail): {}", e.getMessage());
+            logger.error("응답 본문 (위치: getGithubUserEmail): {}", e.getResponseBodyAsString());
             throw e;
         }
     }
