@@ -75,7 +75,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // 토큰 유효 시간 확인
+    //토큰 유효 시간 확인
     @GetMapping("/token-remaining-time")
     public ResponseEntity<Long> getTokenRemainingTime(@AuthenticationPrincipal UserDetails userDetails) {
         Long remainingTime = userService.getTokenRemainingTime(userDetails);
@@ -114,7 +114,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
     }
 
-    // 카카오 로그인 유저 정보 조회
+    //카카오 로그인 유저 정보 조회
     @GetMapping("/kakao/{uid}")
     public ResponseEntity<UserDTO> getKakaoUserInfo(@PathVariable String uid) {
         UserDTO user = userService.getKakaoUserInfo(uid);
