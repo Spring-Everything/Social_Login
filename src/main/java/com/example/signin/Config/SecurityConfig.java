@@ -1,6 +1,6 @@
 package com.example.signin.Config;
 
-import com.example.signin.Service.CustomOAuth2UserService;
+import com.example.signin.Service.OAuth2.CustomOAuth2UserService;
 import com.example.signin.Repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,26 +41,6 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    //로컬 포스트맨 테스트
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(authorizeRequests ->
-//                        authorizeRequests
-//                                .requestMatchers("/**").permitAll()
-//                                .anyRequest().authenticated()
-//                )
-//                .sessionManagement(sessionManagement ->
-//                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                );
-//
-//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//
-//        return http.build();
-//    }
-
-    //localhost:8080/login으로 리다이렉팅
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

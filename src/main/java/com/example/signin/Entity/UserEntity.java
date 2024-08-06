@@ -24,6 +24,7 @@ public class UserEntity implements UserDetails {
     private String password;
     private String name;
     private String nickname;
+    private String email;
     private String provider;
 
 

@@ -14,6 +14,7 @@ public class UserDTO {
     private String password;
     private String name;
     private String nickname;
+    private String email;
     private String provider;
 
     public static UserDTO entityToDto(UserEntity userEntity) {
@@ -23,12 +24,13 @@ public class UserDTO {
                 userEntity.getPassword(),
                 userEntity.getName(),
                 userEntity.getNickname(),
+                userEntity.getEmail(),
                 userEntity.getProvider()
         );
     }
 
     public UserEntity dtoToEntity() {
-        return new UserEntity(id, uid, password, name, nickname, provider);
+        return new UserEntity(id, uid, password, name, nickname, email, provider);
     }
 }
 

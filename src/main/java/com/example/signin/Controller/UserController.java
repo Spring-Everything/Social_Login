@@ -1,6 +1,7 @@
 package com.example.signin.Controller;
 
 import com.example.signin.DTO.JWTDTO;
+import com.example.signin.DTO.OAuth2CodeDTO;
 import com.example.signin.DTO.UserDTO;
 import com.example.signin.Service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -105,10 +106,18 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    //카카오 로그인 성공 시 호출되는 메서드
-    @GetMapping("/loginSuccess")
-    public JWTDTO loginSuccess(OAuth2User oAuth2User) {
-        return userService.loginWithOAuth2(oAuth2User);
+    //카카오 로그인 성공 시 호출되는 엔드포인트 (GET)
+    @GetMapping("/oauth2/code/kakao")
+    public ResponseEntity<JWTDTO> kakaoCallback(@RequestParam String code) {
+        JWTDTO jwtDto = userService.loginWithOAuth2(code);
+        return ResponseEntity.ok(jwtDto);
+    }
+
+    //카카오 로그인 성공 시 호출되는 엔드포인트 (POST)
+    @PostMapping("/oauth2/code/kakao")
+    public ResponseEntity<JWTDTO> kakaoLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
+        JWTDTO jwtDto = userService.loginWithOAuth2(codeDTO.getCode());
+        return ResponseEntity.ok(jwtDto);
     }
 
     // 카카오 로그인 유저 정보 조회
