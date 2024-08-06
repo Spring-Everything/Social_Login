@@ -135,17 +135,31 @@ public class UserController {
         return ResponseEntity.ok(jwtDto);
     }
 
-    // 네이버 로그인 성공 시 호출되는 엔드포인트 (GET)
+    //네이버 로그인 성공 시 호출되는 엔드포인트 (GET)
     @GetMapping("/oauth2/code/naver")
     public ResponseEntity<JWTDTO> naverCallback(@RequestParam String code) {
         JWTDTO jwtDto = userService.loginWithNaverOAuth2(code);
         return ResponseEntity.ok(jwtDto);
     }
 
-    // 네이버 로그인 성공 시 호출되는 엔드포인트 (POST)
+    //네이버 로그인 성공 시 호출되는 엔드포인트 (POST)
     @PostMapping("/oauth2/code/naver")
     public ResponseEntity<JWTDTO> naverLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
         JWTDTO jwtDto = userService.loginWithNaverOAuth2(codeDTO.getCode());
+        return ResponseEntity.ok(jwtDto);
+    }
+
+    //구글 로그인 성공 시 호출되는 엔드포인트 (GET)
+    @GetMapping("/oauth2/code/google")
+    public ResponseEntity<JWTDTO> googleCallback(@RequestParam String code) {
+        JWTDTO jwtDto = userService.loginWithGoogleOAuth2(code);
+        return ResponseEntity.ok(jwtDto);
+    }
+
+    //구글 로그인 성공 시 호출되는 엔드포인트 (POST)
+    @PostMapping("/oauth2/code/google")
+    public ResponseEntity<JWTDTO> googleLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
+        JWTDTO jwtDto = userService.loginWithGoogleOAuth2(codeDTO.getCode());
         return ResponseEntity.ok(jwtDto);
     }
 }

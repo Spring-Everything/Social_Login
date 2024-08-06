@@ -7,6 +7,7 @@ import com.example.signin.Repository.UserRepository;
 import com.example.signin.Config.JWT.JwtTokenProvider;
 import com.example.signin.Config.KakaoOAuthProperties;
 import com.example.signin.Config.NaverOAuthProperties;
+import com.example.signin.Config.GoogleOAuthProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private final RestTemplate restTemplate;
     private final KakaoOAuthProperties kakaoOAuthProperties;
     private final NaverOAuthProperties naverOAuthProperties;
+    private final GoogleOAuthProperties googleOAuthProperties;
 
     //회원가입
     @Override
@@ -170,7 +172,7 @@ public class UserServiceImpl implements UserService {
         return UserDTO.entityToDto(updatedUser);
     }
 
-    // 카카오 로그인 유저 정보 조회
+    //카카오 로그인 유저 정보 조회
     @Override
     public UserDTO getKakaoUserInfo(String uid) {
         UserEntity userEntity = userRepository.findByUid(uid)
@@ -306,7 +308,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // 네이버 인가 코드로 액세스 토큰 요청
+    //네이버 인가 코드로 액세스 토큰 요청
     public String getNaverAccessToken(String code) {
         String url = "https://nid.naver.com/oauth2.0/token";
         HttpHeaders headers = new HttpHeaders();
@@ -334,7 +336,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // 액세스 토큰으로 사용자 정보 요청
+    //액세스 토큰으로 사용자 정보 요청
     public Map<String, Object> getNaverUserInfo(String accessToken) {
         String url = "https://openapi.naver.com/v1/nid/me";
         HttpHeaders headers = new HttpHeaders();
@@ -355,7 +357,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // 네이버 로그인 처리
+    //네이버 로그인 처리
     @Override
     public JWTDTO loginWithNaverOAuth2(String code) {
         try {
@@ -397,6 +399,100 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             logger.error("네이버 로그인 중 오류가 발생했습니다 (위치 : loginWithNaverOAuth2) : {}", e.getMessage());
             throw new RuntimeException("네이버 로그인 중 오류가 발생했습니다. (위치 : loginWithNaverOAuth2)", e);
+        }
+    }
+
+    //구글 인가 코드로 액세스 토큰 요청
+    public String getGoogleAccessToken(String code) {
+        String url = "https://oauth2.googleapis.com/token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", googleOAuthProperties.getClientId());
+        params.add("client_secret", googleOAuthProperties.getClientSecret());
+        params.add("redirect_uri", googleOAuthProperties.getRedirectUri());
+        params.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody != null) {
+                return (String) responseBody.get("access_token");
+            } else {
+                logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
+                return null;
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getGoogleAccessToken): {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    //액세스 토큰으로 사용자 정보 요청
+    public Map<String, Object> getGoogleUserInfo(String accessToken) {
+        String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody != null) {
+                return responseBody;
+            } else {
+                logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
+                return null;
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getGoogleUserInfo): {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    //구글 로그인 처리
+    @Override
+    public JWTDTO loginWithGoogleOAuth2(String code) {
+        try {
+            String accessToken = getGoogleAccessToken(code);
+            Map<String, Object> userInfo = getGoogleUserInfo(accessToken);
+
+            String uid = (String) userInfo.get("sub");
+            String name = (String) userInfo.get("name");
+            String email = (String) userInfo.get("email");
+
+            if (uid == null || name == null || email == null) {
+                throw new RuntimeException("필수 사용자 정보를 가져올 수 없습니다.");
+            }
+
+            Optional<UserEntity> userEntityOptional = userRepository.findByUid(uid);
+            UserEntity userEntity;
+            if (userEntityOptional.isPresent()) {
+                userEntity = userEntityOptional.get();
+                userEntity.setName(name);
+                userEntity.setEmail(email);
+            } else {
+                userEntity = UserEntity.builder()
+                        .uid(uid)
+                        .name(name)
+                        .email(email)
+                        .password(passwordEncoder.encode("OAuth2_User_Password"))
+                        .provider("google")
+                        .build();
+                userRepository.save(userEntity);
+            }
+
+            String token = jwtTokenProvider.generateToken(uid);
+            logger.info("구글 로그인 성공! 새로운 토큰이 발급되었습니다");
+            return new JWTDTO(token, UserDTO.entityToDto(userEntity));
+        } catch (HttpClientErrorException e) {
+            logger.error("구글 API 호출 중 오류가 발생했습니다: {}", e.getMessage());
+            logger.error("응답 본문: {}", e.getResponseBodyAsString());
+            throw new RuntimeException("구글 API 호출 중 오류가 발생했습니다.", e);
+        } catch (Exception e) {
+            logger.error("구글 로그인 중 오류가 발생했습니다 (위치 : loginWithGoogleOAuth2) : {}", e.getMessage());
+            throw new RuntimeException("구글 로그인 중 오류가 발생했습니다. (위치 : loginWithGoogleOAuth2)", e);
         }
     }
 }
