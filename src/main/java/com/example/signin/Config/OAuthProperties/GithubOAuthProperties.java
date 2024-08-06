@@ -1,11 +1,11 @@
-package com.example.signin.Config;
+package com.example.signin.Config.OAuthProperties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "spring.security.oauth2.client.registration.facebook")
-public class FacebookOAuthProperties {
+@ConfigurationProperties(prefix = "spring.security.oauth2.client.registration.github")
+public class GithubOAuthProperties {
     private String clientId;
     private String clientSecret;
     private String redirectUri;
@@ -34,3 +34,4 @@ public class FacebookOAuthProperties {
         this.redirectUri = redirectUri;
     }
 }
+

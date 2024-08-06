@@ -5,10 +5,11 @@ import com.example.signin.DTO.UserDTO;
 import com.example.signin.Entity.UserEntity;
 import com.example.signin.Repository.UserRepository;
 import com.example.signin.Config.JWT.JwtTokenProvider;
-import com.example.signin.Config.KakaoOAuthProperties;
-import com.example.signin.Config.NaverOAuthProperties;
-import com.example.signin.Config.GoogleOAuthProperties;
-import com.example.signin.Config.FacebookOAuthProperties;
+import com.example.signin.Config.OAuthProperties.KakaoOAuthProperties;
+import com.example.signin.Config.OAuthProperties.NaverOAuthProperties;
+import com.example.signin.Config.OAuthProperties.GoogleOAuthProperties;
+import com.example.signin.Config.OAuthProperties.FacebookOAuthProperties;
+import com.example.signin.Config.OAuthProperties.GithubOAuthProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,15 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.UUID;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final NaverOAuthProperties naverOAuthProperties;
     private final GoogleOAuthProperties googleOAuthProperties;
     private final FacebookOAuthProperties facebookOAuthProperties;
+    private final GithubOAuthProperties githubOAuthProperties;
 
     //회원가입
     @Override
@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService {
         logger.info("회원가입 완료! " + userEntity);
         return UserDTO.entityToDto(savedUser);
     }
-
 
     //회원 조회
     @Override
@@ -592,6 +591,126 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    //깃허브 인가 코드로 액세스 토큰 요청
+    public String getGithubAccessToken(String code) {
+        String url = "https://github.com/login/oauth/access_token";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Accept", "application/json");
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", githubOAuthProperties.getClientId());
+        params.add("client_secret", githubOAuthProperties.getClientSecret());
+        params.add("redirect_uri", githubOAuthProperties.getRedirectUri());
+        params.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody != null) {
+                return (String) responseBody.get("access_token");
+            } else {
+                logger.error("액세스 토큰을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
+                return null;
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("액세스 토큰을 가져오는 중 오류가 발생하였습니다. (위치: getGithubAccessToken): {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    //액세스 토큰으로 사용자 정보 요청
+    public Map<String, Object> getGithubUserInfo(String accessToken) {
+        String url = "https://api.github.com/user";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody != null) {
+                return responseBody;
+            } else {
+                logger.error("사용자 정보를 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
+                return null;
+            }
+        } catch (HttpClientErrorException e) {
+            logger.error("사용자 정보를 가져오는 중 오류가 발생했습니다. (위치: getGithubUserInfo): {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    //사용자 이메일 추가 요청
+    public String getGithubUserEmail(String accessToken) {
+        String url = "https://api.github.com/user/emails";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        try {
+            ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
+            List<Map<String, Object>> emails = response.getBody();
+            if (emails != null) {
+                for (Map<String, Object> emailData : emails) {
+                    Boolean primary = (Boolean) emailData.get("primary");
+                    Boolean verified = (Boolean) emailData.get("verified");
+                    String email = (String) emailData.get("email");
+                    if (primary != null && primary && verified != null && verified) {
+                        return email;
+                    }
+                }
+            }
+            logger.error("사용자 이메일을 가져오는데 실패했습니다. 응답 본문이 비어있습니다.");
+            return null;
+        } catch (HttpClientErrorException e) {
+            logger.error("사용자 이메일을 가져오는 중 오류가 발생했습니다. (위치: getGithubUserEmail): {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    //깃허브 로그인 처리
+    @Override
+    public JWTDTO loginWithGithubOAuth2(String code) {
+        try {
+            String accessToken = getGithubAccessToken(code);
+            Map<String, Object> userInfo = getGithubUserInfo(accessToken);
+            String email = getGithubUserEmail(accessToken);
+
+            String uid = String.valueOf(userInfo.get("id"));
+            String name = (String) userInfo.get("name");
+            if (uid == null || name == null || email == null) {
+                throw new RuntimeException("필수 사용자 정보를 가져올 수 없습니다.");
+            }
+
+            Optional<UserEntity> userEntityOptional = userRepository.findByUid(uid);
+            UserEntity userEntity;
+            if (userEntityOptional.isPresent()) {
+                userEntity = userEntityOptional.get();
+                userEntity.setName(name);
+                userEntity.setEmail(email);
+            } else {
+                userEntity = UserEntity.builder()
+                        .uid(uid)
+                        .name(name)
+                        .email(email)
+                        .password(passwordEncoder.encode("OAuth2_User_Password"))
+                        .provider("github")
+                        .build();
+                userRepository.save(userEntity);
+            }
+
+            String token = jwtTokenProvider.generateToken(uid);
+            logger.info("깃허브 로그인 성공! 새로운 토큰이 발급되었습니다");
+            return new JWTDTO(token, UserDTO.entityToDto(userEntity));
+        } catch (HttpClientErrorException e) {
+            logger.error("깃허브 API 호출 중 오류가 발생했습니다: {}", e.getMessage());
+            logger.error("응답 본문: {}", e.getResponseBodyAsString());
+            throw new RuntimeException("깃허브 API 호출 중 오류가 발생했습니다.", e);
+        } catch (Exception e) {
+            logger.error("깃허브 로그인 중 오류가 발생했습니다 (위치 : loginWithGithubOAuth2) : {}", e.getMessage());
+            throw new RuntimeException("깃허브 로그인 중 오류가 발생했습니다. (위치 : loginWithGithubOAuth2)", e);
+        }
+    }
 }
 
 

@@ -29,5 +29,7 @@ public interface UserService {
     Map<String, Object> getGoogleUserInfo(String accessToken);
     JWTDTO loginWithFacebookOAuth2(String code);
     Map<String, Object> getFacebookUserInfo(String accessToken);
+    JWTDTO loginWithGithubOAuth2(String code);
+    Map<String, Object> getGithubUserInfo(String accessToken);
 }
 

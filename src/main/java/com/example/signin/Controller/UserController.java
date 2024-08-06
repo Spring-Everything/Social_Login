@@ -176,5 +176,19 @@ public class UserController {
         JWTDTO jwtDto = userService.loginWithFacebookOAuth2(codeDTO.getCode());
         return ResponseEntity.ok(jwtDto);
     }
+
+    //깃허브 로그인 성공 시 호출되는 엔드포인트 (GET)
+    @GetMapping("/oauth2/code/github")
+    public ResponseEntity<JWTDTO> githubCallback(@RequestParam String code) {
+        JWTDTO jwtDto = userService.loginWithGithubOAuth2(code);
+        return ResponseEntity.ok(jwtDto);
+    }
+
+    //깃허브 로그인 성공 시 호출되는 엔드포인트 (POST)
+    @PostMapping("/oauth2/code/github")
+    public ResponseEntity<JWTDTO> githubLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
+        JWTDTO jwtDto = userService.loginWithGithubOAuth2(codeDTO.getCode());
+        return ResponseEntity.ok(jwtDto);
+    }
 }
 

@@ -64,6 +64,16 @@ spring:
             client-name: Google
             redirect-uri: ${FACEBOOK_REDIRECT_URI}
 
+          github:
+            client-id: ${GITHUB_ID}
+            client-secret: ${GITHUB_SECRET}
+            scope:
+              - read:user
+              - user:email
+            authorization-grant-type: authorization_code
+            client-name: Github
+            redirect-uri: ${GITHUB_REDIRECT_URI}
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -87,4 +97,10 @@ spring:
             authorization-uri: https://www.facebook.com/v10.0/dialog/oauth
             token-uri: https://graph.facebook.com/v10.0/oauth/access_token
             user-info-uri: https://graph.facebook.com/me?fields=id,name,email
+            user-name-attribute: id
+
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
             user-name-attribute: id

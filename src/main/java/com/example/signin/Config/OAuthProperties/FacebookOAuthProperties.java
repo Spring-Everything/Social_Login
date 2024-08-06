@@ -1,11 +1,11 @@
-package com.example.signin.Config;
+package com.example.signin.Config.OAuthProperties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "spring.security.oauth2.client.registration.naver")
-public class NaverOAuthProperties {
+@ConfigurationProperties(prefix = "spring.security.oauth2.client.registration.facebook")
+public class FacebookOAuthProperties {
     private String clientId;
     private String clientSecret;
     private String redirectUri;

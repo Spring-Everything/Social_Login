@@ -1,4 +1,4 @@
-package com.example.signin.Config;
+package com.example.signin.Config.OAuthProperties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
