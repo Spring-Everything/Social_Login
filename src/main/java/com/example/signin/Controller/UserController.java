@@ -106,6 +106,21 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    //카카오 유저 닉네임 설정
+    @PostMapping("/nickname/{uid}")
+    public ResponseEntity<UserDTO> updateNickname(@PathVariable String uid, @RequestBody Map<String, String> request) {
+        String nickname = request.get("nickname");
+        UserDTO updatedUser = userService.updateNickname(uid, nickname);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+    }
+
+    // 카카오 로그인 유저 정보 조회
+    @GetMapping("/kakao/{uid}")
+    public ResponseEntity<UserDTO> getKakaoUserInfo(@PathVariable String uid) {
+        UserDTO user = userService.getKakaoUserInfo(uid);
+        return ResponseEntity.ok(user);
+    }
+
     //카카오 로그인 성공 시 호출되는 엔드포인트 (GET)
     @GetMapping("/oauth2/code/kakao")
     public ResponseEntity<JWTDTO> kakaoCallback(@RequestParam String code) {
@@ -120,19 +135,18 @@ public class UserController {
         return ResponseEntity.ok(jwtDto);
     }
 
-    // 카카오 로그인 유저 정보 조회
-    @GetMapping("/kakao/{uid}")
-    public ResponseEntity<UserDTO> getKakaoUserInfo(@PathVariable String uid) {
-        UserDTO user = userService.getKakaoUserInfo(uid);
-        return ResponseEntity.ok(user);
+    // 네이버 로그인 성공 시 호출되는 엔드포인트 (GET)
+    @GetMapping("/oauth2/code/naver")
+    public ResponseEntity<JWTDTO> naverCallback(@RequestParam String code) {
+        JWTDTO jwtDto = userService.loginWithNaverOAuth2(code);
+        return ResponseEntity.ok(jwtDto);
     }
 
-    //카카오 유저 닉네임 설정
-    @PostMapping("/nickname/{uid}")
-    public ResponseEntity<UserDTO> updateNickname(@PathVariable String uid, @RequestBody Map<String, String> request) {
-        String nickname = request.get("nickname");
-        UserDTO updatedUser = userService.updateNickname(uid, nickname);
-        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+    // 네이버 로그인 성공 시 호출되는 엔드포인트 (POST)
+    @PostMapping("/oauth2/code/naver")
+    public ResponseEntity<JWTDTO> naverLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
+        JWTDTO jwtDto = userService.loginWithNaverOAuth2(codeDTO.getCode());
+        return ResponseEntity.ok(jwtDto);
     }
 }
 
