@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 페이지</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>로그인</h1>
+    <div class="login-section">
+        <h2>일반 로그인</h2>
+        <form id="login-form">
+            <label for="uid">아이디:</label>
+            <input type="text" id="uid" name="uid" required>
+            <label for="password">비밀번호:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">로그인</button>
+        </form>
+    </div>
+    <div class="login-section">
+        <h2>카카오 로그인</h2>
+        <a href="/oauth2/authorization/kakao">
+            <img src="/kakao_login_large_narrow.png" alt="카카오 로그인">
+        </a>
+    </div>
+</div>
+<script src="scripts.js"></script>
+</body>
+</html>

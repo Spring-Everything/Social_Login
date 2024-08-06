@@ -48,8 +48,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/", "/login**", "/oauth2/**", "/login", "/loginFailure", "/error", "/user/login").permitAll()  // 일반 로그인 허용
-                                .requestMatchers("/user/kakao/**").authenticated()  // 카카오 유저 정보 조회 경로 보호
-//                                .anyRequest().authenticated()  // 그 외 모든 요청에 대해 인증 요구
+                                .requestMatchers("/user/kakao/**").authenticated()
                                 .anyRequest().permitAll() // 모든 요청 허용
                 )
                 .sessionManagement(sessionManagement ->
@@ -64,14 +63,12 @@ public class SecurityConfig {
                                         userInfoEndpoint.userService(customOAuth2UserService())
                                 )
                 )
-                .formLogin(formLogin -> formLogin.disable());  // 폼 로그인 비활성화
+                .formLogin(formLogin -> formLogin.disable());
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
