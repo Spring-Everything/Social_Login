@@ -162,5 +162,19 @@ public class UserController {
         JWTDTO jwtDto = userService.loginWithGoogleOAuth2(codeDTO.getCode());
         return ResponseEntity.ok(jwtDto);
     }
+
+    //페이스북 로그인 성공 시 호출되는 엔드포인트 (GET)
+    @GetMapping("/oauth2/code/facebook")
+    public ResponseEntity<JWTDTO> facebookCallback(@RequestParam String code) {
+        JWTDTO jwtDto = userService.loginWithFacebookOAuth2(code);
+        return ResponseEntity.ok(jwtDto);
+    }
+
+    //페이스북 로그인 성공 시 호출되는 엔드포인트 (POST)
+    @PostMapping("/oauth2/code/facebook")
+    public ResponseEntity<JWTDTO> facebookLoginPost(@RequestBody OAuth2CodeDTO codeDTO) {
+        JWTDTO jwtDto = userService.loginWithFacebookOAuth2(codeDTO.getCode());
+        return ResponseEntity.ok(jwtDto);
+    }
 }
 

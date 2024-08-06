@@ -27,5 +27,7 @@ public interface UserService {
     JWTDTO loginWithNaverOAuth2(String code);
     JWTDTO loginWithGoogleOAuth2(String code);
     Map<String, Object> getGoogleUserInfo(String accessToken);
+    JWTDTO loginWithFacebookOAuth2(String code);
+    Map<String, Object> getFacebookUserInfo(String accessToken);
 }
 
