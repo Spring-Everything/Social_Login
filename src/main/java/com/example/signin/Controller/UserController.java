@@ -4,19 +4,13 @@ import com.example.signin.DTO.JWTDTO;
 import com.example.signin.DTO.OAuth2CodeDTO;
 import com.example.signin.DTO.UserDTO;
 import com.example.signin.Service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
 import java.util.Map;
 
 @RestController
@@ -112,13 +106,6 @@ public class UserController {
         String nickname = request.get("nickname");
         UserDTO updatedUser = userService.updateNickname(uid, nickname);
         return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
-    }
-
-    //카카오 로그인 유저 정보 조회
-    @GetMapping("/kakao/{uid}")
-    public ResponseEntity<UserDTO> getKakaoUserInfo(@PathVariable String uid) {
-        UserDTO user = userService.getKakaoUserInfo(uid);
-        return ResponseEntity.ok(user);
     }
 
     //카카오 로그인 성공 시 호출되는 엔드포인트 (GET)

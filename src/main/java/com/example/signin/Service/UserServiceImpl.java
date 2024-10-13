@@ -42,30 +42,6 @@ public class UserServiceImpl implements UserService {
     private final FacebookOAuthProperties facebookOAuthProperties;
     private final GithubOAuthProperties githubOAuthProperties;
 
-    //회원가입
-    @Override
-    public UserDTO createUser(UserDTO userDTO) {
-        if (isUidDuplicate(userDTO.getUid())) {
-            throw new IllegalArgumentException("중복된 아이디가 존재합니다");
-        } else if (isNicknameDuplicate(userDTO.getNickname())) {
-            throw new IllegalArgumentException("닉네임이 이미 존재합니다");
-        }
-        UserEntity userEntity = userDTO.dtoToEntity();
-        userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        userEntity.setProvider("local"); // 직접 회원가입은 'local'로 설정
-        UserEntity savedUser = userRepository.save(userEntity);
-        logger.info("회원가입 완료! " + userEntity);
-        return UserDTO.entityToDto(savedUser);
-    }
-
-    //회원 조회
-    @Override
-    public UserDTO getUserByUid(String uid) {
-        UserEntity userEntity = userRepository.findByUid(uid)
-                .orElseThrow(() -> new RuntimeException("유저의 uid가 " + uid + "인 사용자를 찾을 수 없습니다"));
-        return UserDTO.entityToDto(userEntity);
-    }
-
     //아이디 중복 확인
     @Override
     public boolean isUidDuplicate(String uid) {
@@ -76,6 +52,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isNicknameDuplicate(String nickname) {
         return userRepository.existsByNickname(nickname);
+    }
+
+    //회원가입
+    @Override
+    public UserDTO createUser(UserDTO userDTO) {
+        if (isUidDuplicate(userDTO.getUid())) {
+            throw new IllegalArgumentException("중복된 아이디가 존재합니다");
+        } else if (isNicknameDuplicate(userDTO.getNickname())) {
+            throw new IllegalArgumentException("중복된 닉네임이 존재합니다");
+        }
+        UserEntity userEntity = userDTO.dtoToEntity();
+        userEntity.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        userEntity.setProvider("normal");
+        UserEntity savedUser = userRepository.save(userEntity);
+        logger.info("회원가입 완료! " + userEntity);
+        return UserDTO.entityToDto(savedUser);
     }
 
     //로그인
@@ -90,6 +82,14 @@ public class UserServiceImpl implements UserService {
         String token = jwtTokenProvider.generateToken(uid);
         logger.info("로그인 성공! 새로운 토큰이 발급되었습니다");
         return new JWTDTO(token, UserDTO.entityToDto(userEntity));
+    }
+
+    //유저 조회
+    @Override
+    public UserDTO getUserByUid(String uid) {
+        UserEntity userEntity = userRepository.findByUid(uid)
+                .orElseThrow(() -> new RuntimeException("유저의 uid가 " + uid + "인 사용자를 찾을 수 없습니다"));
+        return UserDTO.entityToDto(userEntity);
     }
 
     //회원 정보 수정
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long getTokenRemainingTime(UserDetails userDetails) {
         String uid = userDetails.getUsername();
-        String token = jwtTokenProvider.getActiveToken(uid); // 활성화된 토큰을 가져옵니다.
+        String token = jwtTokenProvider.getActiveToken(uid);
         if (token == null || jwtTokenProvider.isTokenInvalid(token)) {
             throw new IllegalArgumentException("유효하지 않거나 만료된 토큰입니다");
         }
@@ -171,14 +171,6 @@ public class UserServiceImpl implements UserService {
         UserEntity updatedUser = userRepository.save(userEntity);
         logger.info("사용자 닉네임 업데이트 완료! " + updatedUser);
         return UserDTO.entityToDto(updatedUser);
-    }
-
-    //카카오 로그인 유저 정보 조회
-    @Override
-    public UserDTO getKakaoUserInfo(String uid) {
-        UserEntity userEntity = userRepository.findByUid(uid)
-                .orElseThrow(() -> new RuntimeException("유저의 uid가 " + uid + "인 사용자를 찾을 수 없습니다"));
-        return UserDTO.entityToDto(userEntity);
     }
 
     @PostConstruct

@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 @Entity(name = "users")
 @NoArgsConstructor
@@ -26,7 +25,6 @@ public class UserEntity implements UserDetails {
     private String nickname;
     private String email;
     private String provider;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
