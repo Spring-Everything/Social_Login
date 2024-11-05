@@ -3,9 +3,8 @@ package com.example.signin.Service;
 import com.example.signin.DTO.JWTDTO;
 import com.example.signin.DTO.UserDTO;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UserService {
@@ -13,15 +12,18 @@ public interface UserService {
     boolean isNicknameDuplicate(String nickname);
     UserDTO createUser(UserDTO userDTO);
     JWTDTO login(String uid, String password);
-    UserDTO getUserByUid(String uid);
+    List<UserDTO> getAllUser(String uid, UserDetails userDetails);
+    UserDTO getUserByUid(String uid, UserDetails userDetails);
+    UserDTO getUserByNickname(String uid, String nickname, UserDetails userDetails);
+    List<UserDTO> searchUserByNickname(String uid, String nickname, UserDetails userDetails);
     UserDTO updateUser(String uid, UserDTO userDTO, UserDetails userDetails);
-    void deleteUser(String uid, UserDetails userDetails);
+    UserDTO deleteUser(String uid, UserDetails userDetails);
     Long refreshToken(UserDetails userDetails);
     Long getTokenRemainingTime(UserDetails userDetails);
-    JWTDTO getUserWithTokenInfo(String uid, String token);
-    UserDTO updateNickname(String uid, String nickname);
-    String getAccessToken(String code);
-    JWTDTO loginWithOAuth2(String code);
+    JWTDTO getUserWithTokenInfo(String uid, String token, UserDetails userDetails);
+    UserDTO updateNickname(String uid, String nickname, UserDetails userDetails);
+    String getKakaoAccessToken(String code);
+    JWTDTO loginWithKakaoOAuth2(String code);
     Map<String, Object> getNaverUserInfo(String accessToken);
     JWTDTO loginWithNaverOAuth2(String code);
     JWTDTO loginWithGoogleOAuth2(String code);

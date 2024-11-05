@@ -1,4 +1,4 @@
-package com.example.signin.Service.OAuth2;
+package com.example.signin.Config.OAuth2;
 
 import com.example.signin.Entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
